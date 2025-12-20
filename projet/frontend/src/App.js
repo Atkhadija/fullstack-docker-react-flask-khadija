@@ -1,14 +1,24 @@
 import React, { Component } from 'react';
-import List from "./List"
+import List from "./List";
+import logo from './logo.svg'; // si tu veux garder le logo animé
 
 class App extends Component {
-  render () {
+  render() {
     return (
-      <div className="container">
-        <div className="row">
-          <div className="col-md-6 mx-auto">
-            <h1 className="text-center">TODO</h1>
-            <List />
+      <div className="App">
+        {/* Header personnalisé */}
+        <header className="App-header">
+          <h1 className="App-title">Mon Projet Docker</h1>
+          <h2 className="App-subtitle">Khadija Ait Lahcen - École Supérieure de Technologie</h2>
+        </header>
+
+        {/* Section TODO */}
+        <div className="container mt-4">
+          <div className="row">
+            <div className="col-md-6 mx-auto">
+              <h3 className="text-center">Liste des tâches</h3>
+              <List />
+            </div>
           </div>
         </div>
       </div>
@@ -17,3 +27,4 @@ class App extends Component {
 }
 
 export default App;
+
