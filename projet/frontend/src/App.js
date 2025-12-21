@@ -8,7 +8,7 @@ class App extends Component {
       <div className="App">
         {/* Header personnalisé */}
         <header className="App-header">
-          <h1 className="App-title">Mon Projet Docker avec jenkins</h1>
+          <h1 className="App-title">Mon Projet Docker avec jenkins test rebuild</h1>
           <h2 className="App-subtitle">Khadija Ait Lahcen - École Supérieure de Technologie</h2>
         </header>
 
