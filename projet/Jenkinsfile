@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_API_VERSION = '1.43'
+        GITHUB_CREDENTIALS = credentials('github-credentials') 
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        DOCKERHUB_USERNAME = 'Atkhadija' 
+        BACKEND_IMAGE = "${DOCKERHUB_USERNAME}/todo-backend"
+        FRONTEND_IMAGE = "${DOCKERHUB_USERNAME}/todo-frontend"
+    }
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                echo '📥 Récupération du code depuis GitHub...'
+                git branch: 'main',
+                    url: 'https://github.com/Atkhadija/fullstack-docker-react-flask-khadija.git',
+                    credentialsId: 'github-credentials'
+            }
+        }
+
+        stage('Build Backend Docker Image') {
+            steps {
+                echo '⚙️ Construction de l’image Docker backend...'
+                dir('projet/backend') { 
+                    sh "docker build -t ${BACKEND_IMAGE}:latest -t ${BACKEND_IMAGE}:${BUILD_NUMBER} ."
+                }
+            }
+        }
+
+        stage('Build Frontend Docker Image') {
+            steps {
+                echo '⚙️ Construction de l’image Docker frontend...'
+                dir('projet/frontend') { 
+                    sh "docker build -t ${FRONTEND_IMAGE}:latest -t ${FRONTEND_IMAGE}:${BUILD_NUMBER} ."
+                }
+            }
+        }
+
+        stage('Run Docker Compose Locally') {
+            steps {
+                echo '🚀 Lancement de l’application localement avec Docker Compose...'
+                dir('projet') {
+                    sh "docker-compose up -d --build"
+                }
+            }
+        }
+
+        stage('Push Images to Docker Hub') {
+            steps {
+                echo '📤 Push des images Docker vers Docker Hub...'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
+                        docker tag projet-backend \$DOCKER_USER/todo-backend:latest
+                        docker tag projet-frontend \$DOCKER_USER/todo-frontend:latest
+                        docker push \$DOCKER_USER/todo-backend:latest
+                        docker push \$DOCKER_USER/todo-frontend:latest
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo '✅ Pipeline terminé, nettoyage effectué si nécessaire.'
+        }
+        success {
+            echo '🎉 Pipeline exécuté avec succès ! Les images sont sur Docker Hub.'
+        }
+        failure {
+            echo '❌ Pipeline échoué, vérifie les logs ci-dessus.'
+        }
+    }
+}
